@@ -1,5 +1,5 @@
-Zachary’s code from 2017
-I think this is latest version!
+#Zachary’s code from 2017
+#I think this is latest version!
 from sr.robot import *
 import math
 import time
@@ -75,7 +75,7 @@ def get_robot_world_position_from_marker(marker):
     elif(marker_wall == "top"):
         x_position = marker_x + sin_distance
         y_position = marker_y - cos_distance
-    print "(",x_position, ", ", y_position, ") from token ", marker.info.code
+    print ("(",x_position, ", ", y_position, ") from token ", marker.info.code)
     return [x_position, y_position]
 def get_robot_world_rotation_from_marker(marker):
     marker_wall = wall_marker_info[marker.info.code]["wall"]
@@ -91,7 +91,7 @@ def get_robot_world_rotation_from_marker(marker):
         robot_world_rotation = 90 +(angle+ from_robot_angle)
     if(robot_world_rotation < 0):
         robot_world_rotation += 360
-    print "angle from x axis", robot_world_rotation, " from token ", marker.info.code
+    print ("angle from x axis", robot_world_rotation, " from token ", marker.info.code)
     return robot_world_rotation
 def get_average_world_position_from_markers(markers):
     sum_world_position = [0, 0]
@@ -174,35 +174,35 @@ def find_token_by_code(markers, code):
     return token_to_return
 while True:
     markers = R.see()
-    print STATE
+    print (STATE)
     if(len(markers) < 1):
         # this is really bad..
         # lets spin a bit and hope things get bette
-        print "I DIDN'T SEE ANY MARKERS :("
+        print ("I DIDN'T SEE ANY MARKERS :(")
         rotate_left(SLOW)
         
     else:
         ROBOT_POSITION = get_average_world_position_from_markers(markers)
         ROBOT_ROTATION = get_average_world_rotation_from_markers(markers)
-        print "ROBOT AT (", ROBOT_POSITION[0], ",", ROBOT_POSITION[1], ")"
-        print "ROBOT ROTATION: ", ROBOT_ROTATION
+        print ("ROBOT AT (", ROBOT_POSITION[0], ",", ROBOT_POSITION[1], ")")
+        print ("ROBOT ROTATION: ", ROBOT_ROTATION)
     
         if STATE == "FIND_TOKEN":
             closest_marker = get_closest_marker(markers)
             if(closest_marker):
                 MARKER_TO_FETCH = closest_marker.info.code
-                print "TRYING TO FETCH:",MARKER_TO_FETCH
+                print ("TRYING TO FETCH:",MARKER_TO_FETCH)
                 STATE = "GOING_TO_TOKEN"
         if STATE == "GOING_TO_TOKEN":
             token_we_want = find_token_by_code(markers, MARKER_TO_FETCH)
             if token_we_want:
                 if token_we_want.dist < 1:
-                    print "APPROACHING:", MARKER_TO_FETCH
+                    print ("APPROACHING:", MARKER_TO_FETCH)
                     STATE = "APROACH_TOKEN"
                 else:
                     rotate_towards_relative_angle(token_we_want.rot_y)
             else:
-                print "LOST SIGHT OF:", MARKER_TO_FETCH
+                print ("LOST SIGHT OF:", MARKER_TO_FETCH)
                 STATE = "FIND_TOKEN"
         if STATE =="APROACH_TOKEN":
             move_forward(FAST)
@@ -247,4 +247,4 @@ while True:
             else:  
                 HOME_ANGLE = get_angle_from_robot_to_coordinates(ROBOT_POSITION, [home_positions[R.zone]["x"], home_positions[R.zone]["y"]])
                 rotate_towards_world_angle(ROBOT_ROTATION, HOME_ANGLE)
-                print "HOME ANGLE: ",HOME_ANGLE
+                print ("HOME ANGLE: ",HOME_ANGLE)
