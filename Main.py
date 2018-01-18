@@ -26,4 +26,6 @@ while (x < 5):
 	time.sleep(1)
 	x += 1
 		
+tokens = r.camera.see()
+
 #pip install git+https://github.com/sourcebots/robot-api
