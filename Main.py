@@ -1,20 +1,29 @@
 from robot import Robot
-from sr.robot import *
 import math
 import time
 
-#Test comment
 r = Robot()
+motor_board = r.motor_board
+x = 0
 
-tokens = r.camera.see()
+def Move_forward(Speed):
+	r.motor_board.m0 = Speed
+	r.motor_board.m1 = Speed
 
-x = 1
+def Move_backwards(speed):
+	r.motor_board.m0 = -speed
+	r.motor_board.m1 = -speed
 
-while (x =- 1):
-    Move_Forward(100)
+while (x < 5):
+	Move_forward(1)
+	time.sleep(1)
+	x+= 1
 
-def Move_forward(Speed)
-	MOTOR_LEFT.power = Speed
-    MOTOR_RIGHT.power = Speed
+x= 0
 
-#pip install git+https://github.com/sourcebots/robot-ap
+while (x < 5):
+	Move_backwards(1)
+	time.sleep(1)
+	x += 1
+		
+#pip install git+https://github.com/sourcebots/robot-api
