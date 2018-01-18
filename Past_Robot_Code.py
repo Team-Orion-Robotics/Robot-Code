@@ -52,6 +52,7 @@ home_positions = {
     2: {"x": 8, "y": 0},
     3: {"x": 0, "y": 0}
 }
+
 def get_robot_world_position_from_marker(marker):
     marker_info = wall_marker_info[marker.info.code]
     marker_x = marker_info["x"]
@@ -77,6 +78,7 @@ def get_robot_world_position_from_marker(marker):
         y_position = marker_y - cos_distance
     print ("(",x_position, ", ", y_position, ") from token ", marker.info.code)
     return [x_position, y_position]
+
 def get_robot_world_rotation_from_marker(marker):
     marker_wall = wall_marker_info[marker.info.code]["wall"]
     angle = marker.orientation.rot_y
@@ -93,6 +95,7 @@ def get_robot_world_rotation_from_marker(marker):
         robot_world_rotation += 360
     print ("angle from x axis", robot_world_rotation, " from token ", marker.info.code)
     return robot_world_rotation
+
 def get_average_world_position_from_markers(markers):
     sum_world_position = [0, 0]
     average_world_position = [0, 0]
@@ -107,6 +110,7 @@ def get_average_world_position_from_markers(markers):
         average_world_position[0] = (sum_world_position[0] / number_markers)
         average_world_position[1] = (sum_world_position[1] / number_markers)
     return average_world_position
+
 def get_average_world_rotation_from_markers(markers):
     sum_world_rotation = 0
     number_markers = 0
@@ -119,6 +123,7 @@ def get_average_world_rotation_from_markers(markers):
     if number_markers > 0:
         average_world_rotation = sum_world_rotation / number_markers
     return average_world_rotation
+
 def get_angle_from_robot_to_coordinates(robot_position, coordinates):
     dx = coordinates[0] - robot_position[0] 
     dy = coordinates[1] - robot_position[1]
@@ -129,18 +134,23 @@ def get_angle_from_robot_to_coordinates(robot_position, coordinates):
     if angle < 0:
         angle += 360
     return angle
+
 def rotate_left(power):
     MOTOR_LEFT.power = power
     MOTOR_RIGHT.power = -power
+
 def rotate_right(power):
     MOTOR_LEFT.power = -power
     MOTOR_RIGHT.power = power
+
 def move_forward(power):
     MOTOR_LEFT.power = power
     MOTOR_RIGHT.power = power
+
 def stop_moving():
     MOTOR_LEFT.power = 0
     MOTOR_RIGHT.power = 0
+
 def rotate_towards_world_angle(robot_angle, desired_angle):
     if(abs(desired_angle - robot_angle) < 10):
         move_forward(SLOW)
@@ -151,6 +161,7 @@ def rotate_towards_world_angle(robot_angle, desired_angle):
     else:
         rotate_left(SLOW)
         print("rotate right")
+
 def rotate_towards_relative_angle(angle):
     if angle > 10:
         rotate_right(SLOW)
@@ -158,6 +169,7 @@ def rotate_towards_relative_angle(angle):
         rotate_left(SLOW)
     else:
         move_forward(SLOW)
+
 def get_closest_marker(markers, token_types = [MARKER_TOKEN_A, MARKER_TOKEN_B, MARKER_TOKEN_C]):
     closest_marker = None
     closest_distance = 99999
@@ -166,12 +178,14 @@ def get_closest_marker(markers, token_types = [MARKER_TOKEN_A, MARKER_TOKEN_B, M
             if m.dist < closest_distance:
                 closest_marker = m
     return closest_marker
+
 def find_token_by_code(markers, code):
     token_to_return = None
     for m in markers:
         if m.info.code == code:
             token_to_return = m
     return token_to_return
+
 while True:
     markers = R.see()
     print (STATE)
