@@ -21,7 +21,12 @@ count = 0
 
 #region Movement Code
 
-def Move_forward(Speed, Time, Brake_Or_Coast):
+def Move(Speed, Time, Brake_Or_Coast):
+
+    if Speed > 1 or Speed < -1:
+        print("ATTEMPT TO CALL MOVE FUNCTION WITH INVALID SPEED")
+        return
+    
     r.motor_board.m0 = Speed
     r.motor_board.m1 = Speed
     time.sleep(Time)
@@ -37,47 +42,16 @@ def Move_forward(Speed, Time, Brake_Or_Coast):
     else:
         print("Im confused") #When neither Break or Coast is passed through
         
-    print("Moved Forward at {} power for {} seconds".format(Speed, Time))
+    print("Moved at {} power for {} seconds".format(Speed, Time))
 
-def Move_backwards(speed, Time, Brake_Or_Coast):    #Example movement Call: Move_forward(1 (full speed), 1 (1 second), Coast (Will stop power to motors and coast) /Brake (Will lock motors and stop robot))
-    r.motor_board.m0 = -speed
-    r.motor_board.m1 = -speed
-    time.sleep(Time)
+def Rotate(Speed, Time, Brake_Or_Coast):
+
+    if Speed > 1 or Speed < -1:
+        print("ATTEMPT TO CALL ROTATE FUNCTION WITH INVALID SPEED")
+        return
     
-    if (Break_Or_Coast == "Brake"):
-        r.motor_board.m0 = BRAKE
-        r.motor_board.m1 = BRAKE
-
-    elif (Break_Or_Coast == "Coast"):
-        r.motor_board.m0 = COAST
-        r.motor_board.m1 = COAST
-
-    else:
-        print("Im confused")
-
-    print("Moved Forward at {} power for {} seconds".format(Speed, Time))
-
-def Rotate_right(Speed, Time, Brake_Or_Coast):
     r.motor_board.m0 = -Speed
     r.motor_board.m1 = Speed
-    time.sleep(Time)
-    
-    if (Break_Or_Coast == "Brake"):
-        r.motor_board.m0 = BRAKE
-        r.motor_board.m1 = BRAKE
-
-    elif (Break_Or_Coast == "Coast"):
-        r.motor_board.m0 = COAST
-        r.motor_board.m1 = COAST
-
-    else:
-        print("Im confused")
-
-    print("Moved Forward at {} power for {} seconds".format(Speed, Time))
-
-def Rotate_left(Speed, Time, Brake_Or_Coast):
-    r.motor_board.m0 = Speed
-    r.motor_board.m1 = -Speed
     time.sleep(Time)
     
     if (Break_Or_Coast == "Brake"):
@@ -133,7 +107,7 @@ def Check_If_Time_To_Return(): #We need to call this literally whenever possible
 def Set_Home_Tokens():
     Done = "False"
 
-    Rotate_left(1, 0.7, "Brake") #rotate 90 degress left, alter to ensure we are turning 90 degrees by changeing the time value (measured in seconds)
+    Rotate(1, 0.7, "Brake") #rotate 90 degress left, alter to ensure we are turning 90 degrees by changeing the time value (measured in seconds)
     
     while (Done == "False"):  #This while is being used to determine what colour our home base is. if for whatever reason we don't turn enough at the start and we can't see any tokens, the robot will turn slightly and try again. 
         Markers = r.camera.see()
@@ -170,26 +144,26 @@ def Set_Home_Tokens():
                 else:
                     Done = "False"
         else:
-            Rotate_left(1, 0.05, "Brake") #Rotate Left a little more in the hope of finding a home base token
+            Rotate(1, 0.05, "Brake") #Rotate Left a little more in the hope of finding a home base token
             count += 1 #counts how many extra times the robot has spun so we can rotate back
 
-    Rotate_right(1, 0.7, "Brake") #Ensure this is the same as the first rotation as above as this function is used to rotate the robot back to its starting position
+    Rotate(1, 0.7, "Brake") #Ensure this is the same as the first rotation as above as this function is used to rotate the robot back to its starting position
     
     if count > 0:
-        Rotate_right(1, (0.05*count), "Brake") #These numbers must be the same as in the previous while loop
+        Rotate(1, (0.05*count), "Brake") #These numbers must be the same as in the previous while loop
 
     count = 0
     print("Home colour is: {}. Home tokens are: {} and {}".format(Home_Base_Colour, Home_Base_Token_1, Home_Base_Token_2))
     print("Facing starting direction")
 
 def Test_Stuff():
-	Move_forward(1, 2, "Brake")
+	Move(1, 2, "Brake")
 	time.sleep(2)
-	Move_backwards(1, 2, "Brake")
+	Move(1, 2, "Brake")
 	time.sleep(2)
-	Rotate_right(1, 2, "Brake")
+	Rotate(1, 2, "Brake")
 	time.sleep(2)
-	Rotate_left(1, 2, "Brake")
+	Rotate(1, 2, "Brake")
 	time.sleep(2)
 
 	Done = False
@@ -200,7 +174,7 @@ def Test_Stuff():
 			r.motor_board.m0 = BRAKE
 			r.motor_board.m1 = BRAKE
 		else:
-			Rotate_left(1, 1, "Coast")
+			Rotate(1, 1, "Coast")
 			Done = False
 
 def Home_Token_Test():
