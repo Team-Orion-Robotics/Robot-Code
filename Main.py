@@ -187,23 +187,31 @@ def Home_Token_Test():
 def Set_Team_Tokens():
 	if (Home_Base_Colour == "Pink"):
 		marker = 44
+		print("Our markers are: ")
 		for x in range(0, 4):
-			Team_Tokens[x] = marker + x			
+			Team_Tokens[x] = marker + x
+			print(Team_Tokens[x])
 		
 	elif (Home_Base_Colour == "Green"):
 		marker = 50
+		print("Our markers are: ")
 		for x in range(0, 4):
 			Team_Tokens[x] = marker + x	
+			print(Team_Tokens[x])
 			
 	elif (Home_Base_Colour == "Yellow"):
 		marker = 55
+		print("Our markers are: ")
 		for x in range(0, 4):
-			Team_Tokens[x] = marker + x	
+			Team_Tokens[x] = marker + x
+			print(Team_Tokens[x])
 			
 	elif (Home_Base_Colour == "Orange"):
 		marker = 60
+		print("Our markers are: ")
 		for x in range(0, 4):
-			Team_Tokens[x] = marker + x	
+			Team_Tokens[x] = marker + x
+			print(Team_Tokens[x])
 			
 	else:
 		print("Something went wrong, we don't have a home base colour")
