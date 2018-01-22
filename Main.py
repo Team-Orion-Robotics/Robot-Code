@@ -15,6 +15,10 @@ Home_Base_Colour = str
 Home_Base_Token_1 = int
 Home_Base_Token_2 = int
 
+Team_Tokens[4] = int #Make this an array, just having a guess
+
+Our_Tokens
+
 Start_Time = datetime.datetime.now()
 
 count = 0
@@ -104,18 +108,18 @@ def Check_If_Time_To_Return(): #We need to call this literally whenever possible
         return False
 
 
-def Set_Home_Tokens():
-    Done = "False"
+def Set_Home_Tokens(): 
+    Done = False
 
     Rotate(1, 0.7, "Brake") #rotate 90 degress left, alter to ensure we are turning 90 degrees by changeing the time value (measured in seconds)
-    
-    while (Done == "False"):  #This while is being used to determine what colour our home base is. if for whatever reason we don't turn enough at the start and we can't see any tokens, the robot will turn slightly and try again. 
-        Markers = r.camera.see()
+    				#comment out if we are allowed to start our robot facing our home base token
+    while (Done == False):  #This while is being used to determine what colour our home base is. if for whatever reason we don't turn enough at the start and we can't see any tokens, the robot will turn slightly and try again. 
+        markers = r.camera.see()
         if (len(Markers) > 0):
             for m in Markers:
                 if (m.id == 0 or m.id == 27):
-			if (m.cartesian.z < 2): #m.cartesian.z will return the distance in meters
-                    		Home_Base_Colour = "Pink"
+			if (m.cartesian.z < 2): #m.cartesian.z will return the distance in meters, checking the marker we are looking at
+                    		Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
                     		Home_Base_Token_1 = 0
                     		Home_Base_Token_2 = 27
                     		Done = "True"
@@ -124,7 +128,7 @@ def Set_Home_Tokens():
 			if (m.cartesian.z < 2):
                     		Home_Base_Colour = "Green"
                     		Home_Base_Token_1 = 6
-                   		 Home_Base_Token_2 = 7
+                   		Home_Base_Token_2 = 7
                     		Done = "True"
 
                 elif (m.id == 13 or m.id == 14):
@@ -145,7 +149,7 @@ def Set_Home_Tokens():
                     Done = "False"
         else:
             Rotate(1, 0.05, "Brake") #Rotate Left a little more in the hope of finding a home base token
-            count += 1 #counts how many extra times the robot has spun so we can rotate back
+            count += 1 #counts how many extra times the robot has spun so we can rotate back the same number of times
 
     Rotate(1, 0.7, "Brake") #Ensure this is the same as the first rotation as above as this function is used to rotate the robot back to its starting position
     
@@ -179,10 +183,27 @@ def Test_Stuff():
 
 def Home_Token_Test():
 	Set_Home_Tokens()
-
-Test_Stuff()
-time.sleep(2)
-Home_Token_Test()
-print("Test Successfull")
 	
-	
+def Set_Team_Tokens():
+	if (Home_Base_Colour == "Pink"):
+		marker = 44
+		for x in range(0, 4):
+			Team_Tokens[x] = marker + x			
+		
+	elif (Home_Base_Colour == "Green"):
+		marker = 50
+		for x in range(0, 4):
+			Team_Tokens[x] = marker + x	
+			
+	elif (Home_Base_Colour == "Yellow"):
+		marker = 55
+		for x in range(0, 4):
+			Team_Tokens[x] = marker + x	
+			
+	elif (Home_Base_Colour == "Orange"):
+		marker = 60
+		for x in range(0, 4):
+			Team_Tokens[x] = marker + x	
+			
+	else:
+		print("Something went wrong, we don't have a home base colour")
