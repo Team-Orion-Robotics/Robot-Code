@@ -1,6 +1,6 @@
 #pip install git+https://github.com/sourcebots/robot-api
 
-from robot import Robot
+from robot import Robot #Fucking hate this shite language
 from robot import BRAKE
 from robot import COAST
 
@@ -15,7 +15,7 @@ Home_Base_Colour = str
 Home_Base_Token_1 = int
 Home_Base_Token_2 = int
 
-Team_Tokens[4] = int #Make this an array, just having a guess
+Team_Tokens = [0,0,0,0,0]
 
 Our_Tokens
 
