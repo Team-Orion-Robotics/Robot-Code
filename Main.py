@@ -17,8 +17,6 @@ Home_Base_Token_2 = int
 
 Team_Tokens = [0,0,0,0,0]
 
-Our_Tokens
-
 Start_Time = datetime.datetime.now()
 
 count = 0
@@ -118,32 +116,29 @@ def Set_Home_Tokens():
         if (len(Markers) > 0):
             for m in Markers:
                 if (m.id == 0 or m.id == 27):
-			if (m.cartesian.z < 2): #m.cartesian.z will return the distance in meters, checking the marker we are looking at
-                    		Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
-                    		Home_Base_Token_1 = 0
-                    		Home_Base_Token_2 = 27
-                    		Done = "True"
-
+                    if (m.cartesian.z < 2):#m.cartesian.z will return the distance in meters, checking the marker we are looking at
+                        Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
+                        Home_Base_Token_1 = 0
+                        Home_Base_Token_2 = 27
+                        Done = "True"
                 elif (m.id == 6 or m.id == 7):
-			if (m.cartesian.z < 2):
-                    		Home_Base_Colour = "Green"
-                    		Home_Base_Token_1 = 6
-                   		Home_Base_Token_2 = 7
-                    		Done = "True"
-
+                    if (m.cartesian.z < 2):
+                        Home_Base_Colour = "Green"
+                        Home_Base_Token_1 = 6
+                        Home_Base_Token_2 = 7
+                        Done = "True"
                 elif (m.id == 13 or m.id == 14):
-			if (m.cartesian.z < 2):
-                    		Home_Base_Colour = "Yellow"
-                    		Home_Base_Token_1 = 13
-                    		Home_Base_Token_2 = 14
-                    		Done = "True"
-
+                    if (m.cartesian.z < 2):
+                        Home_Base_Colour = "Yellow"
+                        Home_Base_Token_1 = 13
+                        Home_Base_Token_2 = 14
+                        Done = "True"
                 elif (m.id == 20 or m.id == 21):
-			if (m.cartesian.z < 2):
-                    		Home_Base_Colour = "Orange"
-                    		Home_Base_Token_1 = 20
-                    		Home_Base_Token_2 = 21
-                    		Done = "True"
+                    if (m.cartesian.z < 2):
+                        Home_Base_Colour = "Orange"
+                        Home_Base_Token_1 = 20
+                        Home_Base_Token_2 = 21
+                        Done = "True"
 
                 else:
                     Done = "False"
@@ -161,26 +156,42 @@ def Set_Home_Tokens():
     print("Facing starting direction")
 
 def Test_Stuff():
-	Move(1, 2, "Brake")
-	time.sleep(2)
-	Move(1, 2, "Brake")
-	time.sleep(2)
-	Rotate(1, 2, "Brake")
-	time.sleep(2)
-	Rotate(1, 2, "Brake")
-	time.sleep(2)
+    VisionTest()
 
-	Done = False
-	
-	while (Done == False):
-		if (Check_If_Time_To_Return() == True):
-			Done = True
-			r.motor_board.m0 = BRAKE
-			r.motor_board.m1 = BRAKE
-		else:
-			Rotate(1, 1, "Coast")
-			Done = False
-
+def VisionTest():
+    print("testing vision")
+    Done=False
+    while not(Done):
+        Tokens = r.camera.see()
+        print(Tokens)
+        if len(Tokens) == 0:
+            print("Nothing to see")
+            pass
+        else:
+            for m in tokens
+                print(m.id)
+            
+            print(Tokens[0])
+            print(Tokens[0].id)
+            Home_Base_Token_1 = Tokens[0].id
+            Done=True
+            Move(0.2,0.5,"Brake")
+            print("token Set")
+        time.sleep(1)
+    while True:
+        print("Looked")
+        Tokens=r.camera.see()
+        for m in Tokens:
+            if m.id == Home_Base_Token_1:
+                if m.PolarCoord.rot_x_deg<-10:
+                    Rotate(0.5,0.5,"Coast")
+                elif m.PolarCoord.rot_x_deg>10:
+                    Rotate(-0.5,0.5,"Coast")
+                else:
+                    print("Facing marker with rotation {}".format(m.PolarCoord.rot_x_deg))
+        time.sleep(1)
+                    
+    
 def Home_Token_Test():
 	Set_Home_Tokens()
 	
@@ -215,3 +226,5 @@ def Set_Team_Tokens():
 			
 	else:
 		print("Something went wrong, we don't have a home base colour")
+
+Test_Stuff()
