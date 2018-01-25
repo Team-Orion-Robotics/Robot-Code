@@ -156,7 +156,7 @@ def Set_Home_Tokens():
     print("Facing starting direction")
 
 def Test_Stuff():
-    VisionTest()
+    Dans_Vision_Test
 
 def VisionTest():
     print("testing vision")
@@ -168,7 +168,7 @@ def VisionTest():
             print("Nothing to see")
             pass
         else:
-            for m in tokens
+            for m in tokens:
                 print(m.id)
             
             print(Tokens[0])
@@ -177,7 +177,7 @@ def VisionTest():
             Done=True
             Move(0.2,0.5,"Brake")
             print("token Set")
-        time.sleep(1)
+            time.sleep(1)
     while True:
         print("Looked")
         Tokens=r.camera.see()
@@ -190,8 +190,41 @@ def VisionTest():
                 else:
                     print("Facing marker with rotation {}".format(m.PolarCoord.rot_x_deg))
         time.sleep(1)
-                    
-    
+
+def Dans_Vision_Test():
+    print("Testing Dan's vision test")
+    Done = False
+
+    markers = r.camera.see()
+
+    while (done == False):
+        if (len(markers) > 0):
+            for m in markers:
+                if (m.id == "44"):
+                    Done = True
+
+        else:
+            print("No markers in sight")
+            Rotate(1, 0.2, "Coast")
+
+    Done = False
+
+    while (done == False):
+        for m in markers:
+            if (m.id == "44"):
+                if m.PolarCoord.rot_x_deg<-10:
+                    Rotate(0.5,0.5,"Coast")
+
+                elif m.PolarCoord.rot_x_deg>10:
+                    Rotate(-0.5,0.5,"Coast")
+
+                else:
+                    move(1, 1, "Brake")
+                    print("Facing marker with rotation {}".format(m.PolarCoord.rot_x_deg))
+                    done = False
+
+    print("Test Sucessful")
+                                  
 def Home_Token_Test():
 	Set_Home_Tokens()
 	
