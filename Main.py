@@ -42,7 +42,8 @@ def Move(Speed, Time, Brake_Or_Coast):
 		r.motor_board.m1 = COAST
 
 	else:
-		print("Im confused") #When neither Break or Coast is passed through
+		r.motor_board.m0 = BRAKE
+		r.motor_board.m1 = BRAKE #When neither Brake or Coast is passed throgh, just Brake
         
 	print("Moved at {} power for {} seconds".format(Speed, Time))
 
@@ -65,26 +66,32 @@ def Rotate(Speed, Time, Brake_Or_Coast):
 		r.motor_board.m1 = COAST
 
 	else:
-		print("Im confused")
+		r.motor_board.m0 = BRAKE
+		r.motor_board.m1 = BRAKE #When neither Brake or Coast is passed throgh, just Brake
 
 	print("Rotated at {} power for {} seconds".format(Speed, Time))
 
 #endregion
 
-#region Servo control #Only uncomment all this shit when the servo board is connected, otherwise it will throw and error and crash
-#def Lower_Front_Barrier():
-#    r.servo_board.servos[0].position = -1  #Ensure the front Servo is connected to the S2
+region Servo control
+def Lower_Front_Barrier():
+    r.servo_board.servos[0].position = -1  #Ensure the front Servo is connected to the S2
+    time.sleep(1000) #Change to ensure Barrier is fully lowered
+    
+def Raise_Front_Barrier():
+    r.servo_board.servos[0].position = 1
+    time.sleep(1000) #Change to ensure Barrier is fully lowered
 
-#def Raise_Front_Barrier():
-#    r.servo_board.servos[0].position = 1
+def Lower_Rear_Barrier():
+    r.servo_board.servos[1].position = -1 #Ensure the rear Servo is cnnected to the S1
+    time.sleep(1000) #Change to ensure Barrier is fully lowered
 
-#def Lower_Rear_Barrier():
-#    r.servo_board.servos[1].position = -1  #Ensure the rear Servo is cnnected to the S1
 
-#def Raise_Rear_Barrier():
-#    r.servo_board.servos[1].position = 1
+def Raise_Rear_Barrier():
+    r.servo_board.servos[1].position = 1
+    time.sleep(1000) #Change to ensure Barrier is fully lowered
 
-#endregion
+endregion
 
 def Check_If_Time_To_Return(): #We need to call this literally whenever possible as it will only check when called. Will return True if time remaining is less than 45 seconds. and False if more than 45 seconds is left. This can be tweeked as needed depending on speed of Robot
 	Stuff = False
