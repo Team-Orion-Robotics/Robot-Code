@@ -73,9 +73,58 @@ def Rotate(Speed, Time, Brake_Or_Coast):
 
 #endregion
 
-region Servo control
+#region Ultrasound
+def Ultrasound(Mod):
+	if (Mod == 0):
+		Trigger = 9
+		Echo = 8
+	elif(Mod == 1):
+		Trigger = 9
+		Echo = 8
+	elif(Mod == 2):
+		Trigger = 11
+		Echo = 10
+	elif(Mod == 3):
+		Trigger = 11
+		Echo = 10
+	print("Returned " + str(r.servo_board.read_ultrasound(Trigger, Echo)) + " for Module " + str(Mod))
+	return r.servo_board.read_ultrasound(Trigger, Echo)
+
+def UltrasoundDist(FOR,Dist,Tol):
+	speed = 1
+	LEFT = 0
+	RIGHT = 1
+	if (FOR == "R"):
+		speed = -1
+		LEFT = 2
+		RIGHT = 3
+	done = True
+	while done == True:			
+		DTO = Ultrasound(LEFT)
+		#R = Ultrasound(RIGHT)
+		#if(DTO > R):
+		#	DTO = R
+		if (DTO < Dist - Tol):
+			Move(-speed,0.3,"Brake")
+		elif(DTO > Dist + Tol):
+			Move(speed,0.3,"Coast")
+		elif(DTO > Dist - Tol and DTO < Dist + Tol):
+			done = False
+
+def UltrasoundTest(Dist,Tol):
+	done = True
+	while done == True:
+		UltrasoundDist("F",Dist,Tol)
+		print("Forward done")
+		time.sleep(1)
+		UltrasoundDist("R",Dist,Tol)
+		print("Reverse done")
+
+#endregion
+
+#region Servo control
 def Lower_Front_Barrier():
-    r.servo_board.servos[0].position = -1  #Ensure the front Servo is connected to the S2
+    r.servo_board.servos[0].position = -1  #Ensure the front Servo is connected to the S0
     time.sleep(1000) #Change to ensure Barrier is fully lowered
     
 def Raise_Front_Barrier():
@@ -91,7 +140,7 @@ def Raise_Rear_Barrier():
     r.servo_board.servos[1].position = 1
     time.sleep(1000) #Change to ensure Barrier is fully lowered
 
-endregion
+#endregion
 
 def Check_If_Time_To_Return(): #We need to call this literally whenever possible as it will only check when called. Will return True if time remaining is less than 45 seconds. and False if more than 45 seconds is left. This can be tweeked as needed depending on speed of Robot
 	Stuff = False
@@ -160,109 +209,6 @@ def Set_Home_Tokens():
 	count = 0
 	print("Home colour is: {}. Home tokens are: {} and {}".format(Home_Base_Colour, Home_Base_Token_1, Home_Base_Token_2))
 	print("Facing starting direction")
-
-def Test_Stuff():
-    Dans_Vision_Test()
-
-def VisionTest():
-	print("testing vision")
-	Done=False
-	while not(Done):
-		Tokens = r.camera.see()
-		print(Tokens)
-		if len(Tokens) == 0:
-			print("Nothing to see")
-            
-		else:
-			for m in tokens:
-				print(m.id)
-            
-			print(Tokens[0])
-			print(Tokens[0].id)
-			Home_Base_Token_1 = Tokens[0].id
-			Done=True
-			Move(0.2,0.5,"Brake")
-			print("token Set")
-			time.sleep(1)
-	while True:
-		print("Looked")
-		Tokens=r.camera.see()
-		for m in Tokens:
-			if m.id == Home_Base_Token_1:
-				if m.PolarCoord.rot_x_deg<-10:
-					Rotate(0.5,0.5,"Coast")
-				elif m.PolarCoord.rot_x_deg>10:
-					Rotate(-0.5,0.5,"Coast")
-				else:
-					print("Facing marker with rotation {}".format(m.PolarCoord.rot_x_deg))
-		time.sleep(1)
-
-def Dans_Vision_Test():
-	print("Testing Dan's vision")
-		
-	done = False
-
-	while (done == False):
-		print("")
-		
-		markers = r.camera.see()
-	
-		if (len(markers) > 0):
-			for m in markers:
-				print(m.id)
-				if (m.id == 45):
-					done = True
-
-		if (done == False and len(markers) > 0):
-			print("Marker 45 not in sight, rotating")
-			Rotate(1, 0.2, "Brake")
-		elif (done == False and len(markers) == 0):
-			print("No markers in sight")
-			Rotate(1, 0.2, "Brake")
-		elif (done == True):
-			print("Marker 45 in sight")
-		
-		time.sleep(1)	
-		
-	while (done == True):
-		r.servo_board.servos[0].position = 1
-		time.sleep(5)	
-		done = False
-	
-	r.servo_board.servos[0].position = 0
-	Rotate(-1, 0.5, "Brake")
-	
-	while (done == False):
-		for m in markers:
-			if (m.id == 45):
-				if m.PolarCoord.rot_x_deg<-5:
-					Rotate(0.5,1,"Coast")
-
-				elif m.PolarCoord.rot_x_deg>5:
-					Rotate(-0.5,1,"Coast")
-
-				else:
-					print("Facing marker with rotation {}".format(m.PolarCoord.rot_x_deg))
-					done = True
-					
-		time.sleep(1)
-	done = False
-		
-	while (done == False):
-		for m in markers:
-			if (m.id == 45):
-				if (m.cartesian.z > 1):
-					Move(1, 0.5, "Coast")
-			else:
-				print("Within 1m of token")
-
-	print("Test Successful")
-    
-	while True:
-		r.servo_board.servos[0].position = 1
-                                                      
-def Home_Token_Test():
-	Set_Home_Tokens()
 	
 def Set_Team_Tokens():
 	if (Home_Base_Colour == "Pink"):
@@ -295,5 +241,3 @@ def Set_Team_Tokens():
 			
 	else:
 		print("Something went wrong, we don't have a home base colour")
-
-Test_Stuff()
