@@ -15,7 +15,8 @@ Home_Base_Colour = str
 Home_Base_Token_1 = int
 Home_Base_Token_2 = int
 
-Team_Tokens = [0,0,0,0,0]
+Team_Tokens = [44,45,46,47,48]
+Collected_Tokens = [False, False, False, False, False] #These correlate to the team tokens array above
 
 Start_Time = datetime.datetime.now()
 
@@ -23,9 +24,16 @@ count = 0
 
 #region Movement Code
 
+def MotorBoardTest():
+        for i in range(0, 1, 0.05):
+                try:
+                        Move(i, 0.5, "Brake")
+                except:
+                        print("Fucked it. Read last speed value")
+
 def Move(Speed, Time, Brake_Or_Coast):
 
-	if Speed > 1 or Speed < -1:
+	if Speed > 1 or Speed < -1: #Need to change these values to ensure we don't overflow the motor board
 		print("ATTEMPT TO CALL MOVE FUNCTION WITH INVALID SPEED")
 		return
     
@@ -49,7 +57,7 @@ def Move(Speed, Time, Brake_Or_Coast):
 
 def Rotate(Speed, Time, Brake_Or_Coast):
 
-	if Speed > 1 or Speed < -1:
+	if Speed > 1 or Speed < -1: #Negative speed will rotate the robot left, positive speed right
 		print("ATTEMPT TO CALL ROTATE FUNCTION WITH INVALID SPEED")
 		return
     
@@ -85,16 +93,16 @@ def Ultrasound(Mod):
 		Trigger = 11
 		Echo = 10
 	elif(Mod == 3):
-		Trigger = 11
-		Echo = 10
+		Trigger = 13
+		Echo = 12
 	print("Returned " + str(r.servo_board.read_ultrasound(Trigger, Echo)) + " for Module " + str(Mod))
 	return r.servo_board.read_ultrasound(Trigger, Echo)
 
-def UltrasoundDist(FOR,Dist,Tol):
+def UltrasoundDist(Direction, Dist, Tol):
 	speed = 1
 	LEFT = 0
 	RIGHT = 1
-	if (FOR == "R"):
+	if (Direction == "R"):
 		speed = -1
 		LEFT = 2
 		RIGHT = 3
@@ -111,7 +119,7 @@ def UltrasoundDist(FOR,Dist,Tol):
 		elif(DTO > Dist - Tol and DTO < Dist + Tol):
 			done = False
 
-def UltrasoundTest(Dist,Tol):
+def UltrasoundTest(Dist, Tol):
 	done = True
 	while done == True:
 		UltrasoundDist("F",Dist,Tol)
@@ -160,7 +168,7 @@ def Check_If_Time_To_Return(): #We need to call this literally whenever possible
 	else:
 		return False
 
-def Set_Home_Tokens(): 
+def Set_Home_Tokens(): #Shouldn't be needed as were assuming were in zone 0. However I have left it incase. 
 	Done = False
 
 	Rotate(1, 0.7, "Brake") #rotate 90 degress left, alter to ensure we are turning 90 degrees by changeing the time value (measured in seconds)
@@ -170,25 +178,25 @@ def Set_Home_Tokens():
 		if (len(Markers) > 0):
 			for m in Markers:
 				if (m.id == 0 or m.id == 27):
-					if (m.cartesian.z < 2):#m.cartesian.z will return the distance in meters, checking the marker we are looking at
+					if (m.spherical.distance_metres < 2):#m.cartesian.z will return the distance in meters, checking the marker we are looking at
 						Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
 						Home_Base_Token_1 = 0
 						Home_Base_Token_2 = 27
 						Done = "True"
 				elif (m.id == 6 or m.id == 7):
-					if (m.cartesian.z < 2):
+					if (m.spherical.distance_metres < 2):
 						Home_Base_Colour = "Green"
 						Home_Base_Token_1 = 6
 						Home_Base_Token_2 = 7
 						Done = "True"
 				elif (m.id == 13 or m.id == 14):
-					if (m.cartesian.z < 2):
+					if (m.spherical.distance_metres < 2):
 						Home_Base_Colour = "Yellow"
 						Home_Base_Token_1 = 13
 						Home_Base_Token_2 = 14
 						Done = "True"
 				elif (m.id == 20 or m.id == 21):
-					if (m.cartesian.z < 2):
+					if (m.spherical.distance_metres < 2):
 						Home_Base_Colour = "Orange"
 						Home_Base_Token_1 = 20
 						Home_Base_Token_2 = 21
@@ -201,7 +209,7 @@ def Set_Home_Tokens():
 			count += 1 #counts how many extra times the robot has spun so we can rotate back the same number of times
 
 	Rotate(1, 0.7, "Brake") #Ensure this is the same as the first rotation as above as this function is used to rotate the robot back to its starting position
-    
+
 	if (count > 0):
 		for x in range (1, count):
 			Rotate(1, (0.05*count), "Brake") #These numbers must be the same as in the previous while loop
@@ -210,34 +218,94 @@ def Set_Home_Tokens():
 	print("Home colour is: {}. Home tokens are: {} and {}".format(Home_Base_Colour, Home_Base_Token_1, Home_Base_Token_2))
 	print("Facing starting direction")
 	
-def Set_Team_Tokens():
+def Set_Team_Tokens(): #Shouldn't be needed, as we start in zone 0. However I am keeping it just in case. 
+	marker = 0        
 	if (Home_Base_Colour == "Pink"):
-		marker = 45
-		print("Our markers are: ")
-		for x in range(0, 4):
-			Team_Tokens[x] = marker + x
-			print(Team_Tokens[x])
-		
+		marker = 44
 	elif (Home_Base_Colour == "Green"):
-		marker = 50
-		print("Our markers are: ")
-		for x in range(0, 4):
-			Team_Tokens[x] = marker + x	
-			print(Team_Tokens[x])
-			
+		marker = 49
 	elif (Home_Base_Colour == "Yellow"):
-		marker = 55
-		print("Our markers are: ")
-		for x in range(0, 4):
-			Team_Tokens[x] = marker + x
-			print(Team_Tokens[x])
-			
+		marker = 54
 	elif (Home_Base_Colour == "Orange"):
-		marker = 60
-		print("Our markers are: ")
-		for x in range(0, 4):
-			Team_Tokens[x] = marker + x
-			print(Team_Tokens[x])
-			
+		marker = 59
 	else:
-		print("Something went wrong, we don't have a home base colour")
+		print("We don't have a home base colour, call Set_Home_Tokens() first")
+
+		if (marker != 0):
+			print("Our markers are: ")
+			for x in range(0, 5):
+				Team_Tokens[x] = marker + x
+				print(Team_Tokens[x])
+
+def SmoothAim(AimFor): #AimFor takes a marker object, but only the id is used
+	D=AimFor.spherical.distance_metres
+	Rot=AimFor.spherical.rot_y_radians
+	Power=(7*4**(-abs(D))+0.5)*(0.2*Rot)+0.5
+	print("Distance :%f Rotation :%f Power :%f"%(D,Rot,Power))
+	if D<0.3:
+		r.motor_board.m0 = 0.5
+		r.motor_board.m1 = 0.5
+	else:
+		if Power <= 1 and Power >= -1:
+			r.motor_board.m0 = 0.5
+			r.motor_board.m1 = Power
+			print("Lesser motor power of %f" % (Power))
+		else:
+			print("failed due to power issues")
+			Move(-0.3,2,"Brake")
+	try:
+		return D
+	except:
+		print("Dafuq?!")
+		return 100
+
+                
+STATE = str
+STATE = "Drive To Our Boxes"    
+                
+While True:
+	if STATE == "BoxCollection":
+		Return = False
+		Raise_Front_Barrier() #Ready to accept new boxes
+
+		while STATE == "BoxCollection"
+			Done = True
+			for i in range(0, 5):
+				if CollectedTokens(i) == False:
+					Done = False #We still have some boxes to collect
+
+			if TimeToReturn() == True
+				Return = True
+				Done = True #We are out of time, break out of loop and return home. What we currently have in our possession will do. 
+
+			if Done == False #Still have some boxes of ours to collect
+				markers = r.camera.see()
+					Skip = True
+
+					if len(markers) != 0: #we can see atleast 1 box
+						for m in markers:
+							for i in range(0, 5):
+								if m.id == Team_Tokens(i): #One of the boxes we see, is one of our tokens
+									Skip = False #As we saw a box of ours, we don't need to rotate away
+									SmoothAim(m)
+									#if Front Light Gate is triggered. Add that when the function is done. May insert this into smooth aim function
+									Collected_Tokens((44 - m.id)) = True #Sets the collecte token to collected so we know when we have it.
+
+							if Skip == True: #Didn't see one of our boxes. Time to rotate
+								Rotate(1, 0.2, "Brake") #Rotate and try the above again. Keep rotating until we see one of our tokens basically.
+								time.sleep(1) 
+					else:
+						Rotate(1, 0.2, "Brake") #Rotate until we can see a box
+						time.sleep(1)
+			else:
+				if Return = True:
+					STATE = "Return To Base" #Don't have time to check, just need to return to our base and drop current boxes
+				else:
+					STATE = "Check For Collected Tokens" #We have all our boxes, break out of the loop and do a 360 as a final check.
+					Close_Front_Barrier() #Close barrier as we are done with box collection. 
+
+	elif STATE == "Check For Collected Tokens" #we have all our boxes in our possession. Drive around until time to return
+
+	elif STATE == "Return To Base" #Need to wait till Dan's coord code works and is implemented to try and get this one working
+	
+	elif STATE == "Messing With People" #State of driving around pushing boxes around until time to return to our base
