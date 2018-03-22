@@ -1,7 +1,0 @@
-1. Navigate to Repository locally
-
-Git Pull
-
-Git status (returns whether the git repository is up to date)
-Git commit -m "Commit message" (Message is requried or it fucks with the command line)
-git push (actually puts stuff on github)
