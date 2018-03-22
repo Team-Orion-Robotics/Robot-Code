@@ -1,5 +1,4 @@
 #pip install git+https://github.com/sourcebots/robot-api
-
 from robot import Robot
 from robot import BRAKE
 from robot import COAST
@@ -16,14 +15,15 @@ Home_Base_Token_1 = int
 Home_Base_Token_2 = int
 
 Team_Tokens = [44,45,46,47,48]
-Collected_Tokens = [False, False, False, False, False] #These correlate to the team tokens array above
+Collected_Tokens = [False, False, False, False, False] #These correlate to the team tokens array above. C_T(0) = Token 44 etc...
 
 Start_Time = datetime.datetime.now()
 
 count = 0
 
-#region Movement Code
+STATE = "Drive To Our Boxes"  
 
+#region Movement Code
 def MotorBoardTest():
         for i in range(0, 1, 0.05):
                 try:
@@ -78,23 +78,27 @@ def Rotate(Speed, Time, Brake_Or_Coast):
 		r.motor_board.m1 = BRAKE #When neither Brake or Coast is passed throgh, just Brake
 
 	print("Rotated at {} power for {} seconds".format(Speed, Time))
-
 #endregion
+
 
 #region Ultrasound
 def Ultrasound(Mod):
 	if (Mod == 0):
 		Trigger = 9
 		Echo = 8
+		
 	elif(Mod == 1):
 		Trigger = 9
 		Echo = 8
+		
 	elif(Mod == 2):
 		Trigger = 11
 		Echo = 10
+		
 	elif(Mod == 3):
 		Trigger = 13
 		Echo = 12
+		
 	print("Returned " + str(r.servo_board.read_ultrasound(Trigger, Echo)) + " for Module " + str(Mod))
 	return r.servo_board.read_ultrasound(Trigger, Echo)
 
@@ -102,16 +106,20 @@ def UltrasoundDist(Direction, Dist, Tol):
 	speed = 1
 	LEFT = 0
 	RIGHT = 1
+	
 	if (Direction == "R"):
 		speed = -1
 		LEFT = 2
 		RIGHT = 3
+		
 	done = True
+	
 	while done == True:			
 		DTO = Ultrasound(LEFT)
 		#R = Ultrasound(RIGHT)
 		#if(DTO > R):
 		#	DTO = R
+		
 		if (DTO < Dist - Tol):
 			Move(-speed,0.3,"Brake")
 		elif(DTO > Dist + Tol):
@@ -122,13 +130,14 @@ def UltrasoundDist(Direction, Dist, Tol):
 def UltrasoundTest(Dist, Tol):
 	done = True
 	while done == True:
+	
 		UltrasoundDist("F",Dist,Tol)
 		print("Forward done")
 		time.sleep(1)
 		UltrasoundDist("R",Dist,Tol)
 		print("Reverse done")
-
 #endregion
+
 
 #region Servo control
 def Lower_Front_Barrier():
@@ -143,12 +152,11 @@ def Lower_Rear_Barrier():
     r.servo_board.servos[1].position = -1 #Ensure the rear Servo is cnnected to the S1
     time.sleep(1000) #Change to ensure Barrier is fully lowered
 
-
 def Raise_Rear_Barrier():
     r.servo_board.servos[1].position = 1
     time.sleep(1000) #Change to ensure Barrier is fully lowered
-
 #endregion
+
 
 def Check_If_Time_To_Return(): #We need to call this literally whenever possible as it will only check when called. Will return True if time remaining is less than 45 seconds. and False if more than 45 seconds is left. This can be tweeked as needed depending on speed of Robot
 	Stuff = False
@@ -201,7 +209,6 @@ def Set_Home_Tokens(): #Shouldn't be needed as were assuming were in zone 0. How
 						Home_Base_Token_1 = 20
 						Home_Base_Token_2 = 21
 						Done = "True"
-
 				else:
 					Done = "False"
 		else:
@@ -219,7 +226,8 @@ def Set_Home_Tokens(): #Shouldn't be needed as were assuming were in zone 0. How
 	print("Facing starting direction")
 	
 def Set_Team_Tokens(): #Shouldn't be needed, as we start in zone 0. However I am keeping it just in case. 
-	marker = 0        
+	marker = 0    
+    
 	if (Home_Base_Colour == "Pink"):
 		marker = 44
 	elif (Home_Base_Colour == "Green"):
@@ -240,12 +248,16 @@ def Set_Team_Tokens(): #Shouldn't be needed, as we start in zone 0. However I am
 def SmoothAim(AimFor): #AimFor takes a marker object, but only the id is used
 	D=AimFor.spherical.distance_metres
 	Rot=AimFor.spherical.rot_y_radians
+	
 	Power=(7*4**(-abs(D))+0.5)*(0.2*Rot)+0.5
+	
 	print("Distance :%f Rotation :%f Power :%f"%(D,Rot,Power))
+	
 	if D<0.3:
 		r.motor_board.m0 = 0.5
 		r.motor_board.m1 = 0.5
 	else:
+	
 		if Power <= 1 and Power >= -1:
 			r.motor_board.m0 = 0.5
 			r.motor_board.m1 = Power
@@ -253,17 +265,28 @@ def SmoothAim(AimFor): #AimFor takes a marker object, but only the id is used
 		else:
 			print("failed due to power issues")
 			Move(-0.3,2,"Brake")
+			
 	try:
 		return D
+		
 	except:
-		print("Dafuq?!")
-		return 100
+		print("Confused. Something crashed")
+		return 100  
+                
+def Check_If_Time_To_Leave_Zone(ArrivalTime):
+	CurrentTime = datetime.datetime.now()
+	Difference = ArrivalTime - CurrentTime
+	
+	seconds = difference.seconds
+	
+	if (seconds > 20):
+		print("Time to move on to next zone")
+		return True
+	else
+		return False
 
-                
-STATE = str
-STATE = "Drive To Our Boxes"    
-                
-While True:
+		
+While True: #Main STATE code
 	if STATE == "BoxCollection":
 		Return = False
 		Raise_Front_Barrier() #Ready to accept new boxes
@@ -280,7 +303,13 @@ While True:
 
 			if Done == False #Still have some boxes of ours to collect
 				markers = r.camera.see()
-					Skip = True
+				
+				for m in markers: #Scans all the boxes we can see to see if we have dropped one. If the robot sees one we think is in our posetion, set it back to False
+					for i in range(0, 5):
+						if m.id == Team_Tokens(i) and Collected_Tokens(i) == True:
+							Collected_Tokens(i) == False
+							
+					Skip = True #Used to determine if one of the tokens we see is one were hunting for or not.
 
 					if len(markers) != 0: #we can see atleast 1 box
 						for m in markers:
@@ -304,8 +333,54 @@ While True:
 					STATE = "Check For Collected Tokens" #We have all our boxes, break out of the loop and do a 360 as a final check.
 					Close_Front_Barrier() #Close barrier as we are done with box collection. 
 
-	elif STATE == "Check For Collected Tokens" #we have all our boxes in our possession. Drive around until time to return
+	elif STATE == "Check For Collected Tokens" #Do a final check of Zone 0 to ensure we have all our boxes, and we havn't dropped or forgotten any while collecting.
+		while STATE == "Check For Collected Tokens"
+			for i in range(0, 5): #Make the second number the number of rotation calls it takes to do a full 360
+				markers = r.camera.see()
+
+				for m in markers:
+					for i in range(0, 5):
+						if m.id == Team_Tokens(i):
+							Collected_Tokens(i) = False
+							STATE = "BoxCollection"
+
+			if STATE == "Check For Collected Tokens": #The Robot didn't see any of our tokens in its rotation, so were probably good
+				if Check_If_Time_To_Return == False:
+					STATE = "Zone 1" #Move to zone 1 and start messing with their shit
+				else: #Time to return as were out of time
+					STATE = "Return To Base"
 
 	elif STATE == "Return To Base" #Need to wait till Dan's coord code works and is implemented to try and get this one working
+		while STATE == "Return To Base" #When were in our base, set STATE to 'Zone 0'
+			print("Something")
 	
-	elif STATE == "Messing With People" #State of driving around pushing boxes around until time to return to our base
+	elif STATE == "Zone 1" #Zone 1 State
+		Arrival_Time = datetime.datetime.now()
+		
+		while STATE == "Zone 1":
+			if Check_If_Time_To_Return == True:
+				STATE == "Return To Base"
+			elif Check_If_Time_To_Leave_Zone == True:
+				STATE == "Zone 2"
+				
+	elif STATE == "Zone 2" #Zone 2 State
+		Arrival_Time = datetime.datetime.now()
+		
+		while STATE == "Zone ":
+			if Check_If_Time_To_Return == True:
+				STATE == "Return To Base"
+			elif Check_If_Time_To_Leave_Zone == True:
+				STATE == "Zone 3"
+		
+	elif STATE == "Zone 3" #Zone 3 State
+		Arrival_Time = datetime.datetime.now()
+		
+		while STATE == "Zone 3":
+			if Check_If_Time_To_Return == True:
+				STATE == "Return To Base"
+			elif Check_If_Time_To_Leave_Zone == True:
+				STATE == "Zone 1"
+			
+	elif STATE == "Zone 0" #Home State. we need to use this state to ensure boxes are pushed out of our zone when weve returned
+		while STATE == "Zone 0"
+			print("Something")
