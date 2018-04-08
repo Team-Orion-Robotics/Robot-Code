@@ -21,15 +21,10 @@ Start_Time = datetime.datetime.now()
 
 count = 0
 
-STATE = "Drive To Our Boxes"  
+STATE = "Drive To Our Boxes"
+Current_Zone = int
 
 #region Movement Code
-def MotorBoardTest():
-        for i in range(0, 1, 0.05):
-                try:
-                        Move(i, 0.5, "Brake")
-                except:
-                        print("Fucked it. Read last speed value")
 
 def Move(Speed, Time, Brake_Or_Coast):
 
@@ -178,48 +173,33 @@ def Check_If_Time_To_Return(): #We need to call this literally whenever possible
 
 def Set_Home_Tokens(): #Shouldn't be needed as were assuming were in zone 0. However I have left it incase. 
 	Done = False
-
-	Rotate(1, 0.7, "Brake") #rotate 90 degress left, alter to ensure we are turning 90 degrees by changeing the time value (measured in seconds)
-    				#comment out if we are allowed to start our robot facing our home base token
-	while (Done == False):  #This while is being used to determine what colour our home base is. if for whatever reason we don't turn enough at the start and we can't see any tokens, the robot will turn slightly and try again. 
-		markers = r.camera.see()
-		if (len(Markers) > 0):
-			for m in Markers:
-				if (m.id == 0 or m.id == 27):
-					if (m.spherical.distance_metres < 2):#m.cartesian.z will return the distance in meters, checking the marker we are looking at
-						Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
-						Home_Base_Token_1 = 0
-						Home_Base_Token_2 = 27
-						Done = "True"
-				elif (m.id == 6 or m.id == 7):
-					if (m.spherical.distance_metres < 2):
-						Home_Base_Colour = "Green"
-						Home_Base_Token_1 = 6
-						Home_Base_Token_2 = 7
-						Done = "True"
-				elif (m.id == 13 or m.id == 14):
-					if (m.spherical.distance_metres < 2):
-						Home_Base_Colour = "Yellow"
-						Home_Base_Token_1 = 13
-						Home_Base_Token_2 = 14
-						Done = "True"
-				elif (m.id == 20 or m.id == 21):
-					if (m.spherical.distance_metres < 2):
-						Home_Base_Colour = "Orange"
-						Home_Base_Token_1 = 20
-						Home_Base_Token_2 = 21
-						Done = "True"
-				else:
-					Done = "False"
-		else:
-			Rotate(1, 0.05, "Brake") #Rotate Left a little more in the hope of finding a home base token
-			count += 1 #counts how many extra times the robot has spun so we can rotate back the same number of times
-
-	Rotate(1, 0.7, "Brake") #Ensure this is the same as the first rotation as above as this function is used to rotate the robot back to its starting position
-
-	if (count > 0):
-		for x in range (1, count):
-			Rotate(1, (0.05*count), "Brake") #These numbers must be the same as in the previous while loop
+#    				#comment out if we are allowed to start our robot facing our home base token
+#	while (Done == False):  #This while is being used to determine what colour our home base is. if for whatever reason we don't turn enough at the start and we can't see any tokens, the robot will turn slightly and try again. 
+#		markers = r.camera.see()
+#		if (len(Markers) > 0):
+#			for m in Markers:
+	if (robot.zone() == 0):#m.cartesian.z will return the distance in meters, checking the marker we are looking at
+		Home_Base_Colour = "Pink" #is indeed ours and not another teams. if its more than 2 meters away we fucked up.
+		Home_Base_Token_1 = 0
+		Home_Base_Token_2 = 27
+		Done = "True"
+	if (robot.zone() == 1):
+		Home_Base_Colour = "Green"
+		Home_Base_Token_1 = 6
+		Home_Base_Token_2 = 7
+		Done = "True"
+	if (robot.zone() == 2):
+		Home_Base_Colour = "Yellow"
+		Home_Base_Token_1 = 13
+		Home_Base_Token_2 = 14
+		Done = "True"
+	if (robot.zone() == 3):
+		Home_Base_Colour = "Orange"
+		Home_Base_Token_1 = 20
+		Home_Base_Token_2 = 21
+		Done = "True"
+	else:
+		Done = "False"
 
 	count = 0
 	print("Home colour is: {}. Home tokens are: {} and {}".format(Home_Base_Colour, Home_Base_Token_1, Home_Base_Token_2))
@@ -282,32 +262,40 @@ def Check_If_Time_To_Leave_Zone(ArrivalTime):
 	if (seconds > 20):
 		print("Time to move on to next zone")
 		return True
-	else
+	else:
 		return False
 
 		
-While True: #Main STATE code
+while True: #Main STATE code
+	
+	Set_Home_Tokens()
+	Set_Team_Tokens()
+
+	print("Done Testing")
+
+	time.sleep(10000)
+
 	if STATE == "BoxCollection":
 		Return = False
 		Raise_Front_Barrier() #Ready to accept new boxes
 
-		while STATE == "BoxCollection"
+		while STATE == "BoxCollection":
 			Done = True
 			for i in range(0, 5):
 				if CollectedTokens(i) == False:
 					Done = False #We still have some boxes to collect
 
-			if TimeToReturn() == True
+			if TimeToReturn() == True:
 				Return = True
 				Done = True #We are out of time, break out of loop and return home. What we currently have in our possession will do. 
 
-			if Done == False #Still have some boxes of ours to collect
+			if Done == False: #Still have some boxes of ours to collect
 				markers = r.camera.see()
 				
 				for m in markers: #Scans all the boxes we can see to see if we have dropped one. If the robot sees one we think is in our posetion, set it back to False
 					for i in range(0, 5):
-						if m.id == Team_Tokens(i) and Collected_Tokens(i) == True:
-							Collected_Tokens(i) == False
+						if m.id == Team_Tokens(i) and Collected_Tokens[i] == True:
+							Collected_Tokens[i] == False
 							
 					Skip = True #Used to determine if one of the tokens we see is one were hunting for or not.
 
@@ -318,7 +306,7 @@ While True: #Main STATE code
 									Skip = False #As we saw a box of ours, we don't need to rotate away
 									SmoothAim(m)
 									#if Front Light Gate is triggered. Add that when the function is done. May insert this into smooth aim function
-									Collected_Tokens((44 - m.id)) = True #Sets the collecte token to collected so we know when we have it.
+									Collected_Tokens[(44 - m.id)] = True #Sets the collecte token to collected so we know when we have it.
 
 							if Skip == True: #Didn't see one of our boxes. Time to rotate
 								Rotate(1, 0.2, "Brake") #Rotate and try the above again. Keep rotating until we see one of our tokens basically.
@@ -327,21 +315,25 @@ While True: #Main STATE code
 						Rotate(1, 0.2, "Brake") #Rotate until we can see a box
 						time.sleep(1)
 			else:
-				if Return = True:
+				if Return == True:
 					STATE = "Return To Base" #Don't have time to check, just need to return to our base and drop current boxes
 				else:
 					STATE = "Check For Collected Tokens" #We have all our boxes, break out of the loop and do a 360 as a final check.
-					Close_Front_Barrier() #Close barrier as we are done with box collection. 
+					Close_Front_Barrier() #Close barrier as we are done with box collection.
 
-	elif STATE == "Check For Collected Tokens" #Do a final check of Zone 0 to ensure we have all our boxes, and we havn't dropped or forgotten any while collecting.
-		while STATE == "Check For Collected Tokens"
+	elif STATE == "Drive To Our Boxes":
+		while STATE == "Drive To Our Boxes":
+			
+
+	elif STATE == "Check For Collected Tokens": #Do a final check of Zone 0 to ensure we have all our boxes, and we havn't dropped or forgotten any while collecting.
+		while STATE == "Check For Collected Tokens":
 			for i in range(0, 5): #Make the second number the number of rotation calls it takes to do a full 360
 				markers = r.camera.see()
 
 				for m in markers:
 					for i in range(0, 5):
 						if m.id == Team_Tokens(i):
-							Collected_Tokens(i) = False
+							Collected_Tokens[i] = False
 							STATE = "BoxCollection"
 
 			if STATE == "Check For Collected Tokens": #The Robot didn't see any of our tokens in its rotation, so were probably good
@@ -350,37 +342,19 @@ While True: #Main STATE code
 				else: #Time to return as were out of time
 					STATE = "Return To Base"
 
-	elif STATE == "Return To Base" #Need to wait till Dan's coord code works and is implemented to try and get this one working
-		while STATE == "Return To Base" #When were in our base, set STATE to 'Zone 0'
+	elif STATE == "Return To Base": #Need to wait till Dan's coords code works and is implemented to try and get this one working
+		while STATE == "Return To Base": #When were in our base, set STATE to 'Zone 0'
 			print("Something")
 	
-	elif STATE == "Zone 1" #Zone 1 State
+	elif STATE == "Zone 1": #Zone 1 State
 		Arrival_Time = datetime.datetime.now()
 		
-		while STATE == "Zone 1":
+		while STATE == "Enemy Zone":
 			if Check_If_Time_To_Return == True:
 				STATE == "Return To Base"
 			elif Check_If_Time_To_Leave_Zone == True:
 				STATE == "Zone 2"
-				
-	elif STATE == "Zone 2" #Zone 2 State
-		Arrival_Time = datetime.datetime.now()
-		
-		while STATE == "Zone ":
-			if Check_If_Time_To_Return == True:
-				STATE == "Return To Base"
-			elif Check_If_Time_To_Leave_Zone == True:
-				STATE == "Zone 3"
-		
-	elif STATE == "Zone 3" #Zone 3 State
-		Arrival_Time = datetime.datetime.now()
-		
-		while STATE == "Zone 3":
-			if Check_If_Time_To_Return == True:
-				STATE == "Return To Base"
-			elif Check_If_Time_To_Leave_Zone == True:
-				STATE == "Zone 1"
 			
-	elif STATE == "Zone 0" #Home State. we need to use this state to ensure boxes are pushed out of our zone when weve returned
-		while STATE == "Zone 0"
+	elif STATE == "Zone 0": #Home State. we need to use this state to ensure boxes are pushed out of our zone when weve returned
+		while STATE == "Zone 0":
 			print("Something")
