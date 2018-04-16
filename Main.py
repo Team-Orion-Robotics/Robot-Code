@@ -264,8 +264,58 @@ def Check_If_Time_To_Leave_Zone(ArrivalTime):
 		return True
 	else:
 		return False
+	
+def coord(D1,A1,D2,A2,M1ID,M2ID):
+	theta = abs(A1) + abs(A2)
+	if (int(M1ID) == int(M2ID) + 1 or int(M1ID) == int(M2ID) - 1):
+    	if (M1ID == "6" and M2ID <> "7") or (M1ID == "7" and M2ID <> "6") or (M1ID == "13" and M2ID <> "14") or (M1ID == "14" and M2ID <> "13") or (M1ID == "20" and M2ID <> "21") or (M1ID == "21" and M2ID <> "20"):
+            
+            print("D: " + str(D))
+            print("D1" + str(D1))
+            print("D2" + str(D2))
+            print("A1" + str(A1))
+            print("A2" + str(A2))
+            print("theta" + str(theta))
+            AA1 = math.asin(D2*(math.sin(theta))/D)
+            print("AA1" + str(AA1))
+            AA2 = math.asin(D1*(math.sin(theta))/D)
+            print("AA2" + str(AA2))
+            Dx1 = D1*(math.sin(AA1))
+            print("Dx1" + str(Dx1))
+            Dy1 = D1*(math.cos(AA1))
+            print("Dy1" + str(Dy1))
+            Dx2 = D2*(math.sin(AA2))
+            print("Dx2" + str(Dx2))
+            Dy2 = D2*(math.cos(AA2))	
+            print("Dy2" + str(Dy2))
+            Dx = (Dx1 + Dx2)/2
+            Dy = (Dy1 + Dy2)/2
+	
+            loc = int(M1ID) 
+            while loc > 6:
+                loc = loc - 7
+            
+            if (int(M1ID) > 6 and int(M1ID) < 14):
+                SideWall = "E"
+                y = loc + Dx
+                x = Dy
+            elif(int(M1ID) > 20 and int(M1ID) < 28):
+                SideWall = "W"
+                y = loc + Dx
+                x = Dy
+            elif(int(M1ID) > 0 and int(M1ID) < 7): 
+                SideWall = "N"
+                y=loc + Dy
+                x=Dx
+            elif(int(M1ID) > 13 and int(M1ID) < 21):    
+                SideWall = "S"
+                y=loc + Dy
+                x=Dx
+                
+            location = x + " " + y
+            print(location)
+            return location
 
-		
 while True: #Main STATE code
 	
 	Set_Home_Tokens()
