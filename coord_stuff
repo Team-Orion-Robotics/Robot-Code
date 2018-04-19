@@ -1,0 +1,107 @@
+def coord(D1,A1,D2,A2,M1ID,M2ID,SideWall):
+	theta = abs(A1) + abs(A2)	
+	print("WallFacing:" + SideWall)
+	print("D1:" + str(D1))
+	print("D2:" + str(D2))
+	print("A1:" + str(A1))
+	print("A2:" + str(A2))
+	print("theta:" + str(theta))
+	WD = math.sqrt((D1*D1)+(D2*D2)-(2*D1*D2*(math.cos(theta))))
+	print("D: " + str(WD))
+	D1 = D1*(1/WD)
+	D2 = D2*(1/WD)
+	AA1 = math.asin(D2*(math.sin(theta))/WD)
+	print("AA1:" + str(AA1))
+	AA2 = math.asin(D1*(math.sin(theta))/WD)
+	print("AA2:" + str(AA2))
+	Dx1 = D1*(math.sin(AA1))
+	print("Dx1:" + str(Dx1))
+	Dy1 = D1*(math.cos(AA1))
+	print("Dy1:" + str(Dy1))
+	Dx2 = D2*(math.sin(AA2))
+	print("Dx2:" + str(Dx2))
+	Dy2 = D2*(math.cos(AA2))	
+	print("Dy2:" + str(Dy2))
+	Dx = (Dx1 + Dx2)/2
+	Dy = (Dy1 + Dy2)/2
+	loc = int(M1ID) 
+	while loc > 6:
+		loc = loc - 7
+	print("loc: " + str(loc))	
+	if (SideWall == "N"):
+		y = Dy
+		x = Dx + loc		
+	elif(SideWall == "E"):
+		y = Dx + loc
+		x = 8 - Dy
+	elif(SideWall == "S"): 
+		y = 8 - Dy 
+		x = 8 - Dx - loc
+	elif(SideWall == "W"):    
+		y = 8 - Dx - loc 
+		x = Dy
+                
+	location = str(x) + " " + str(y)
+	print(location)
+	return location
+            
+def WhereAmI():
+	highestnum = 0
+	currentloc = "NA"
+	while highestnum < 2:
+		alltokens = r.camera.see()
+		WallTokens = []
+		for m in alltokens:
+			if int(m.id) < 28:
+				WallTokens.append(m)
+		if len(WallTokens) > 1:
+			SideWallE = 0
+			SideWallW = 0
+			SideWallN = 0
+			SideWallS = 0
+			for m in WallTokens:
+				print(m.id)
+				if (int(m.id) > 6 and int(m.id) < 14):
+					SideWallE += 1
+				elif(int(m.id) > 20 and int(m.id)< 28):
+					SideWallW += 1
+				elif(int(m.id) > 0 and int(m.id) < 7): 
+					SideWallN += 1
+				elif(int(m.id) > 13 and int(m.id) < 21):
+					SideWallS += 1
+			highest = "E"
+			highestnum = SideWallE
+			if SideWallW > highestnum:
+				highestnum = SideWallW
+				highest = "W"
+			if SideWallN > highestnum:
+				highestnum = SideWallN
+				highest = "N"
+			if SideWallS > highestnum:
+				highestnum = SideWallS
+				highest = "S"
+			specifiedwalltokens = []
+			for m in WallTokens:
+				if (int(m.id) > 6 and int(m.id) < 14 and highest == "E"):
+					specifiedwalltokens.append(m)
+				elif(int(m.id) > 20 and int(m.id)< 28 and highest == "W"):
+					specifiedwalltokens.append(m)
+				elif(int(m.id) > 0 and int(m.id) < 7 and highest == "N"): 
+					specifiedwalltokens.append(m)
+				elif(int(m.id) > 13 and int(m.id) < 21 and highest == "S"):    
+					specifiedwalltokens.append(m)
+
+			m1 = specifiedwalltokens[0]
+			m2 = specifiedwalltokens[1]
+			D = abs(int(m1.id) - int(m2.id))
+			A1 = m1.spherical.rot_y_radians
+			A2 = m2.spherical.rot_y_radians
+			D1 = m1.distance_metres
+			D2 = m2.distance_metres
+			m1id = m1.id
+			m2id = m2.id
+			currentloc = coord(D1,A1,D2,A2,m1id,m2id,highest)
+		else:
+			Rotate(0.4,0.2, "Brake")
+			time.sleep(0.2)
+	return currentloc
