@@ -126,8 +126,8 @@ def InZone(tol):
 	print(xy)
 	a = xy[0]
 	b = xy[1]
-	if float(a) <= x + tol or float(a) >= x - tol:
-		if float(b) <= y + tol or float(b) >= y - tol:
+	if float(a) <= x + tol and float(a) >= x - tol:
+		if float(b) <= y + tol and float(b) >= y - tol:
 			IZ = True	
 	return IZ           
                 
