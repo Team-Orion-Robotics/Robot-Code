@@ -41,13 +41,12 @@ def coord(D1,A1,D2,A2,M1ID,M2ID,SideWall):
 		y = 8 - Dx - loc 
 		x = Dy
                 
-	location = str(x) + " " + str(y)
+	location = str(x) + "," + str(y)
 	print(location)
 	return location
             
 def WhereAmI():
 	highestnum = 0
-	currentloc = "NA"
 	while highestnum < 2:
 		alltokens = r.camera.see()
 		WallTokens = []
@@ -90,18 +89,46 @@ def WhereAmI():
 					specifiedwalltokens.append(m)
 				elif(int(m.id) > 13 and int(m.id) < 21 and highest == "S"):    
 					specifiedwalltokens.append(m)
-
-			m1 = specifiedwalltokens[0]
-			m2 = specifiedwalltokens[1]
-			D = abs(int(m1.id) - int(m2.id))
-			A1 = m1.spherical.rot_y_radians
-			A2 = m2.spherical.rot_y_radians
-			D1 = m1.distance_metres
-			D2 = m2.distance_metres
-			m1id = m1.id
-			m2id = m2.id
-			currentloc = coord(D1,A1,D2,A2,m1id,m2id,highest)
+			if highestnum > 2:
+				m1 = specifiedwalltokens[0]
+				m2 = specifiedwalltokens[1]
+				D = abs(int(m1.id) - int(m2.id))
+				A1 = m1.spherical.rot_y_radians
+				A2 = m2.spherical.rot_y_radians
+				D1 = m1.distance_metres
+				D2 = m2.distance_metres
+				m1id = m1.id
+				m2id = m2.id
+				return coord(D1,A1,D2,A2,m1id,m2id,highest)
+			else:
+				return("0,0")
 		else:
-			Rotate(0.4,0.2, "Brake")
-			time.sleep(0.2)
-	return currentloc
+			return("0,0")
+	
+def InZone(tol):
+	IZ = False
+	WAI = str(WhereAmI())
+	print(WAI)
+	xy = WAI.split(",")
+	cz = r.zone
+	x = 2.4
+	y = 2.4
+	if cz == 1:
+		x = 5.6
+		y = 2.4
+	elif cz == 2:
+		x = 5.6
+		y = 5.6
+	elif cz == 3:
+		x = 2.4
+		y = 5.6
+	
+	print(xy)
+	a = xy[0]
+	b = xy[1]
+	if float(a) <= x + tol or float(a) >= x - tol:
+		if float(b) <= y + tol or float(b) >= y - tol:
+			IZ = True	
+	return IZ           
+                
+print(InZone(0.7))
