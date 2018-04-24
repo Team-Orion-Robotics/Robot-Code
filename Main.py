@@ -89,7 +89,6 @@ count = 0
 
 Current_Zone = int
 
-#oi you fuck wombles, Servo stop speed is -0.3 not 0!
 
 #Region Movement Code
 def Move(Speed, Time, Brake_Or_Coast):
@@ -210,7 +209,7 @@ def Raise_Rear_Barrier():
 	print("Raising rear barrier")
 	r.servo_board.servos[2].position = -1 #Front Right
 	r.servo_board.servos[3].position = 1 #Front Left
-	time.sleep(3.2)
+	time.sleep(3.5)
 	r.servo_board.servos[2].position = -0.3
 	r.servo_board.servos[3].position = -0.3
 
@@ -218,10 +217,11 @@ def Lower_Rear_Barrier():
 	print("Lowering rear barrier")
 	r.servo_board.servos[2].position = 1 #Front Right
 	r.servo_board.servos[3].position = -1 #Front Left
-	time.sleep(3.2)
+	time.sleep(3.5)
 	r.servo_board.servos[2].position = -0.3
 	r.servo_board.servos[3].position = -0.3
-#EndRegion
+#oi you fuck wombles, Servo stop speed is -0.3 not 0!
+#EndRegion  
 
 
 #Region Timing Stuff
@@ -237,7 +237,7 @@ def Check_If_Time_To_Return(): #We need to call this literally whenever possible
 
 	print("Time remaining: {}".format(remaining_time))
 
-	if (remaining_time < 40): #Change this number to change how long the program dedicates to getting home
+	if (remaining_time < 50): #Change this number to change how long the program dedicates to getting home
 		print("Time to Return")
 		return True
 	else:
@@ -452,6 +452,7 @@ def Target(M,Token):  #Takes a marker object and a boolean variable
 	Target_Done=False
 
 	while Target_Done == False:
+
 		Markers=r.camera.see()
 		Rot=100
 		D=100
@@ -494,6 +495,7 @@ def Target(M,Token):  #Takes a marker object and a boolean variable
 			Target(M,True)
 		else:
 			return
+
 	elif Token:
 		print(D)
 		Move(0.65,(D/0.22)+1, "Coast")
@@ -554,13 +556,14 @@ def GoHome(LastTargetedMarker):
 	Skip = False
 
 	for M in Markers:
-		if M.id == Boxes_Zone_Token_1 % 28 or M.id == Boxes_Zone_Token_2 % 28 or M.id == (Boxes_Zone_Token_1 + 1) % 28 or M.id == (Boxes_Zone_Token_2 - 1) % 28 or M.id == (Boxes_Zone_Token_1 + 2) % 28 or M.id == (Boxes_Zone_Token_2 - 2) % 28 :
-			Rotate(0.65, 3.75, "Coast")
+		if M.id == Boxes_Zone_Token_1 % 28 or M.id == Boxes_Zone_Token_2 % 28 or M.id == (Boxes_Zone_Token_1 + 1) % 28 or M.id == (Boxes_Zone_Token_2 - 1) % 28 or M.id == (Boxes_Zone_Token_1 + 2) % 28 or M.id == (Boxes_Zone_Token_2 - 2) % 28 and Skip == False:
+			print("Looking at the wrong base")
+			Rotate(0.65, 0.7, "Coast")
 			Skip = True
 
 	if Skip == False:
 		for M in Markers:
-			if (M.id == (Home_Base_Token_1 + 2) % 28 or (Home_Base_Token_1 + 25) % 28 == M.id) and M.id != LastTargetedMarker: #Middle - 1
+			if (M.id == (Home_Base_Token_1) % 28 or (Home_Base_Token_1) % 28 == M.id) and M.id != LastTargetedMarker and Skip == False: #Middle - 1
 				print("Home function targeting marker {}".format(M.id))
 				FoundMarker=True
 				LastTargetedMarker=M.id
@@ -571,7 +574,7 @@ def GoHome(LastTargetedMarker):
 
 	if Skip == False:
 		for M in Markers:
-			if (M.id == (Home_Base_Token_1 + 1) % 28 or (Home_Base_Token_1 + 24) % 28 == M.id) and M.id != LastTargetedMarker: #Middle - 2
+			if (M.id == (Home_Base_Token_1 + 1) % 28 or (Home_Base_Token_1 + 24) % 28 == M.id) and M.id != LastTargetedMarker and Skip == False: #Middle - 2
 				print("Home function targeting marker {}".format(M.id))
 				FoundMarker=True
 				LastTargetedMarker=M.id
@@ -582,7 +585,7 @@ def GoHome(LastTargetedMarker):
 
 	if Skip == False:
 		for M in Markers:
-			if (M.id == (Home_Base_Token_1) % 28 or (Home_Base_Token_2) % 28 == M.id) and M.id != LastTargetedMarker: #Inside corners
+			if (M.id == (Home_Base_Token_1 + 2) % 28 or (Home_Base_Token_2 + 25) % 28 == M.id) and M.id != LastTargetedMarker and Skip == False: #Inside corners
 				print("Home function targeting marker {}".format(M.id))
 				FoundMarker=True
 				LastTargetedMarker=M.id
@@ -591,23 +594,25 @@ def GoHome(LastTargetedMarker):
 
 				return LastTargetedMarker
 
-	if Skip == False:
-		for M in Markers:
-			if (M.id == (Home_Base_Token_1+7) % 28 or (Home_Base_Token_1+20) % 28 == M.id) and M.id != LastTargetedMarker: #Other side middles
-				print("Home function targeting marker {}".format(M.id))
-				FoundMarker=True
-				LastTargetedMarker=M.id
-				Target(M,False)
-				Skip = False
+	#if Skip == False:
+	#	for M in Markers:
+	#		if (M.id == (Home_Base_Token_1+7) % 28 or (Home_Base_Token_1+20) % 28 == M.id) and M.id != LastTargetedMarker and Skip == False: #Other side middles
+	#			print("Home function targeting marker {}".format(M.id))
+	#			FoundMarker=True
+	#			LastTargetedMarker=M.id
+	#			Target(M,False)
+	#			Skip = True
 
-				return LastTargetedMarker
+	#			return LastTargetedMarker
 
 	if FoundMarker == False:
 		print("Can't see any wall markers")
-		if random.randint(1,5)==1:
-			Move(-0.65,3,"Coast")
+		if random.randint(1,7)==1:
+			Move(-0.65,2,"Coast")
+			Skip = False
 		else:
 			Rotate(0.6,0.5,"Coast")
+			Skip = False
 
 		return(100)
 
@@ -643,11 +648,16 @@ def DriveToBoxes():
 		Rotate(0.6,1,"Coast")
 #EndRegion
 
+
 def Run():         
 	STATE = "Box Collection" #This needs to be set to "Drive to Our Boxes" for the competition. 
 
 	Move(0.65, 19, "Coast") #Uncomment
 	Lower_Rear_Barrier()
+
+
+
+
 
 	while True: #Main STATE code
 
@@ -662,7 +672,7 @@ def Run():
 					if Collected_Tokens[i] == False:
 						Done = False #We still have some boxes to collect
 						Count += 1
-						
+
 				if Check_If_Time_To_Return():
 					Return = True
 					Done = True #We are out of time, break out of loop and return home. What we currently have in our possession will have to do.
@@ -751,9 +761,30 @@ def Run():
 					STATE = "Box Collection"
 
 
-		elif STATE == "Return To Base": 
+		elif STATE == "Return To Base":
 			while STATE == "Return To Base":
-				LastTargetMarker1 = GoHome(LastTargetedMarker1)
+				marker = r.camera.see()
+				for m in marker:
+					if m.id == Home_Base_Token_1 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					elif m.id == Home_Base_Token_2 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					elif m.id == (Home_Base_Token_1 + 1) % 28 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					elif m.id == (Home_Base_Token_2 - 1) % 28 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					elif m.id == (Home_Base_Token_1 + 2) % 28 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					elif m.id == (Home_Base_Token_2 - 2) % 28 and m.spherical.distance_metres < 1.5:
+						Move(-0.65, 5, "Coast")
+						STATE = "Home Zone"
+					else:
+						LastTargetMarker1 = GoHome(LastTargetedMarker1)
 
 
 		elif STATE == "Enemy Zone": #Needs a lot of work, as currently its shit. 
@@ -767,8 +798,13 @@ def Run():
 	  
 
 		elif STATE == "Home Zone": #Home State. we need to use this state to ensure boxes are pushed out of our zone when weve returned
-			while STATE == "Zone 0":
-				print("Something")
+			First = False
+			while STATE == "Home Zone":
+				if First == False:
+					Raise_Front_Barrier()
+					Raise_Rear_Barrier()
+					print("Were Home")
+					First = True
 				#Might be good to try and add some box clearence stuff here
 
 Run()
